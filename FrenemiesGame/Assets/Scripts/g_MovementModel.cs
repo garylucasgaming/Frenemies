@@ -10,6 +10,7 @@ public class g_MovementModel : MonoBehaviour {
 
     //private Initializers
     private Vector3 movementDirection; //direction object is moving
+    private Vector2 receivedDirection; //direction received from controller
     private Vector3 facingDirection; //direction object is facing
 
     //                        0        1        2        3        4       5        6      7                       
@@ -26,7 +27,7 @@ public class g_MovementModel : MonoBehaviour {
 
     void Update() {
         UpdateDirection();
-        
+        ResetReceievedDirection();
     }
 
     void FixedUpdate()
@@ -39,11 +40,50 @@ public class g_MovementModel : MonoBehaviour {
      void UpdateDirection()
     {
         //TODO: arrows == controller right stick.  change direction
+        movementDirection = new Vector3(receivedDirection.x, receivedDirection.y, 0);
+        if (receivedDirection != Vector2.zero) {
+            Vector3 _facingDirection = movementDirection;
+
+            if (_facingDirection.x != 0 && _facingDirection.y != 0)
+            {
+                if (_facingDirection.x == facingDirection.x)
+                {
+                    _facingDirection.y = 0;
+                }
+                else if (_facingDirection.y == facingDirection.y)
+                {
+                    _facingDirection.x = 0;
+                }
+                else
+                {
+                    _facingDirection.x = 0;
+                }
+            }
+           facingDirection = _facingDirection;
+            Debug.Log("Direciton facing: " + facingDirection);
+       }
     }
+
+   
 
    void  UpdateMovement()
     {
         //TODO: wasd == left stick. tranform
+
+        rigidBody.velocity = movementDirection * speed;
+    }
+
+    void ResetReceievedDirection()
+    {
+        receivedDirection = Vector2.zero;
+    }
+
+    public void SetDirection(Vector2 direction) {
+        if (direction == Vector2.zero) {
+            return;
+        }
+        receivedDirection = direction;
+        Debug.Log("received direction: " + receivedDirection);
     }
 
 }
