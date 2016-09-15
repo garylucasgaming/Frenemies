@@ -35,7 +35,7 @@ public class g_PlayerController : MonoBehaviour {
             return;
         }
         movement.SetDirection(direction);
-        Debug.Log("Sending Direction " + direction);
+      
     }
 
     //send data to action listener
@@ -80,7 +80,7 @@ public class g_PlayerController : MonoBehaviour {
         if (Input.GetAxisRaw("LeftHandVertical") > 0)
         {
             newDirection.y = -1;
-            Debug.Log("DirectionSet" + newDirection);
+           
         }
 
         SetDirection(newDirection);

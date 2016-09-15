@@ -13,8 +13,6 @@ public class g_MovementModel : MonoBehaviour {
     private Vector2 receivedDirection; //direction received from controller
     private Vector3 facingDirection; //direction object is facing
 
-    //                        0        1        2        3        4       5        6      7                       
-    private enum Direction {North, NorthEast, East, SouthEast, South, SouthWest, West, NorthWest }
     
     private g_Character character; //thiis objects character script
     private Rigidbody2D rigidBody; // rigidbody of this object
@@ -60,7 +58,7 @@ public class g_MovementModel : MonoBehaviour {
                 }
             }
            facingDirection = _facingDirection;
-            Debug.Log("Direciton facing: " + facingDirection);
+           
        }
     }
 
@@ -83,7 +81,7 @@ public class g_MovementModel : MonoBehaviour {
             return;
         }
         receivedDirection = direction;
-        Debug.Log("received direction: " + receivedDirection);
+       
     }
 
 }
