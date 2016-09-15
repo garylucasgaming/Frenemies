@@ -12,14 +12,10 @@ public class g_MovementModel : MonoBehaviour {
     private Vector3 movementDirection; //direction object is moving
     private Vector2 receivedDirection; //direction received from controller
     private Vector3 facingDirection; //direction object is facing
-
-    
-    private g_Character character; //thiis objects character script
     private Rigidbody2D rigidBody; // rigidbody of this object
 
     //Sets components to this.component
     void Awake(){
-        character = GetComponent<g_Character>();
         rigidBody = GetComponent<Rigidbody2D>();
     }
 

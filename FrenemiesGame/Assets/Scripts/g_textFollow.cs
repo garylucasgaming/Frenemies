@@ -3,12 +3,14 @@ using System.Collections;
 
 public class g_textFollow : MonoBehaviour {
 
-    public GameObject other;
+    private GameObject other;
 
-	
-	
+
+    void Awake() {
+        other = GameObject.FindGameObjectWithTag("infoBuddy");
+    }
 
 	void Update () {
-        this.transform.position = other.transform.position;
+       transform.position = other.transform.position;
 	}
 }
