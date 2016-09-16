@@ -349,7 +349,7 @@ public class d_MapGenerator : MonoBehaviour
                                     tiles[child0Center.x + (SegX * loops) + ((int)Mathf.Sign(OffsetX) * x), child0Center.y + (SegY * loops)] = true;
                                     for (int i = 1; i < HallWideness; i++)
                                     {
-                                        if (child0Center.y + (SegY * (loops)) - i > 0 && child0Center.y + (SegY * (loops)) < ySizeOfMap - 1 && child0Center.x + (SegX * (loops)) - i > 0 && child0Center.x + (SegX * (loops)) < xSizeOfMap - 1)
+                                        if (child0Center.y + (SegY * (loops)) - i > 0 && child0Center.y + (SegY * (loops)) < ySizeOfMap - 1 && child0Center.x + (SegX * (loops)) - i > 1 && child0Center.x + (SegX * (loops)) < xSizeOfMap - 1)
                                         {
                                         tiles[child0Center.x + (SegX * loops) + ((int)Mathf.Sign(OffsetX) * x) - i, child0Center.y + (SegY * (loops)) - i] = true;
                                         }
@@ -364,7 +364,7 @@ public class d_MapGenerator : MonoBehaviour
                                     tiles[child0Center.x + (SegX * (loops + 1)), child0Center.y + (SegY * loops) + ((int)Mathf.Sign(OffsetY) * y)] = true; 
                                     for (int i = 1; i < HallWideness; i++)
                                     {
-                                        if (child0Center.y + (SegY * (loops)) - i > 0 && child0Center.y + (SegY * (loops)) < ySizeOfMap - 1 && child0Center.x + (SegX * (loops)) - i > 0 && child0Center.x + (SegX * (loops)) < xSizeOfMap - 1)
+                                        if (child0Center.y + (SegY * (loops)) - i > 0 && child0Center.y + (SegY * (loops)) < ySizeOfMap - 1 && child0Center.x + (SegX * (loops)) - i > 1 && child0Center.x + (SegX * (loops)) < xSizeOfMap - 1)
                                         {
                                             tiles[child0Center.x + (SegX * (loops + 1)) - i, child0Center.y + (SegY * loops) + ((int)Mathf.Sign(OffsetY) * y) - i] = true;
                                         }
@@ -395,7 +395,7 @@ public class d_MapGenerator : MonoBehaviour
                                     tiles[child0Center.x + (SegX * (loops)), child0Center.y + (SegY * loops) + ((int)Mathf.Sign(OffsetY) * y)] = true;
                                     for (int i = 1; i < HallWideness; i++)
                                     {
-                                        if (child0Center.y + (SegY * (loops)) - i > 0 && child0Center.y + (SegY * (loops)) < ySizeOfMap - 1 && child0Center.x + (SegX * (loops)) - i > 0 && child0Center.x + (SegX * (loops)) < xSizeOfMap - 1)
+                                        if (child0Center.y + (SegY * (loops)) - i > 0 && child0Center.y + (SegY * (loops)) < ySizeOfMap - 1 && child0Center.x + (SegX * (loops)) - i > 1 && child0Center.x + (SegX * (loops)) < xSizeOfMap - 1)
                                         {
                                             tiles[child0Center.x + (SegX * (loops)) - i, child0Center.y + (SegY * loops) + ((int)Mathf.Sign(OffsetY) * y) - i] = true;
                                         }
@@ -410,7 +410,7 @@ public class d_MapGenerator : MonoBehaviour
                                     tiles[child0Center.x + (SegX * loops) + ((int)Mathf.Sign(OffsetX) * x), child0Center.y + (SegY * (loops+1))] = true;
                                     for (int i = 1; i < HallWideness; i++)
                                     {
-                                        if (child0Center.y + (SegY * (loops)) - i > 0 && child0Center.y + (SegY * (loops)) < ySizeOfMap - 1 && child0Center.x + (SegX * (loops)) - i > 0 && child0Center.x + (SegX * (loops)) < xSizeOfMap - 1)
+                                        if (child0Center.y + (SegY * (loops)) - i > 0 && child0Center.y + (SegY * (loops)) < ySizeOfMap - 1 && child0Center.x + (SegX * (loops)) - i > 1 && child0Center.x + (SegX * (loops)) < xSizeOfMap - 1)
                                         {
                                             tiles[child0Center.x + (SegX * loops) + ((int)Mathf.Sign(OffsetX) * x) - i, child0Center.y + (SegY * (loops + 1)) - i] = true;
                                         }
