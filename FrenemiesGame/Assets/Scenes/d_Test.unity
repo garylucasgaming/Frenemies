@@ -204,16 +204,18 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 542c215a877581c498ae6754ef412ee8, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  MapXSize: 64
+  MapXSize: 128
   MapYSize: 64
-  Subdivisions: 6
-  SubdivisionXRange: {x: 0.45, y: 0.55}
-  SubdivisionYRange: {x: 0.45, y: 0.55}
-  RoomXRange: {x: 0.75, y: 0.8}
-  RoomYRange: {x: 0.7, y: 0.95}
-  EliminateRoomsSmallerOnX: 3
-  EliminateRoomsSmallerOnY: 3
-  CorridorSegments: 1
+  Subdivisions: 4
+  SubdivisionXRange: {x: 0.3, y: 0.7}
+  SubdivisionYRange: {x: 0.4, y: 0.6}
+  RoomXRange: {x: 0.2, y: 1.2}
+  RoomYRange: {x: 0.2, y: 1.2}
+  EliminateRoomsSmallerOnX: 6
+  EliminateRoomsSmallerOnY: 6
+  CorridorSegments: 2
+  MinimumChokePoints: 5
+  HallWideness: 3
 --- !u!4 &1315679834
 Transform:
   m_ObjectHideFlags: 0

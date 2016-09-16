@@ -59,6 +59,8 @@ public class d_MapGenerator : MonoBehaviour
     public int EliminateRoomsSmallerOnY;
 
     public int CorridorSegments;
+    public int MinimumChokePoints;
+    public int HallWideness = 1;
 
     void Start()
     {
@@ -84,7 +86,7 @@ public class d_MapGenerator : MonoBehaviour
         OpenRooms[0].coords.lowerRight = new int2(xSizeOfMap - 1, 0);
         List<d_Room> ClosedRooms = new List<d_Room>();
 
-
+        Debug.Log("Map Generator - Start Rooms");
         while (true)
         {
             if (OpenRooms.Count > 0)
@@ -194,8 +196,9 @@ public class d_MapGenerator : MonoBehaviour
         }
         OpenRooms.AddRange(ClosedRooms);
         ClosedRooms.Clear();
-        
+        Debug.Log("Map Generator - End Rooms");
 
+        Debug.Log("Map Generator - Start Halls");
         List<d_Room> areasToConnect = new List<d_Room>();
         //pick highest parent
         d_Room parent = OpenRooms[0];
@@ -208,7 +211,11 @@ public class d_MapGenerator : MonoBehaviour
         }
 
         //add all children that don't have children
-        areasToConnect.Add(parent);
+        MinimumChokePoints = MinimumChokePoints > 1 ? MinimumChokePoints : 1;
+        for (int i = 0; i < MinimumChokePoints; i++)
+        {
+            areasToConnect.Add(parent);
+        }
         int c = 0;
         while (true)
         {
@@ -238,7 +245,6 @@ public class d_MapGenerator : MonoBehaviour
             //for each child with children, pick 2 children that DON'T have a child beneath it and connect them with a hall.
             if (areasToConnect.Count > 0)
             {
-                Debug.Log("hall loop");
                 List<d_Room> child0Choices = new List<d_Room>();
                 child0Choices.Add(areasToConnect[0].children[0]);
                 List<d_Room> child1Choices = new List<d_Room>();
@@ -249,7 +255,6 @@ public class d_MapGenerator : MonoBehaviour
                 int choiceIndex = 0;
                 while (child0Choices.Count > choiceIndex)
                 {
-                    //Debug.Log("Child0 Loop " + choiceIndex + " / " + child0Choices.Count + " " + child0Choices[choiceIndex].roomDrawn);
                     if(child0Choices[choiceIndex].roomDrawn)
                     {
                         choiceIndex++;
@@ -272,7 +277,6 @@ public class d_MapGenerator : MonoBehaviour
                             }
                         }
 
-                        //Debug.Log(choiceIndex + " removed");
                     }
 
                     child0Choices.RemoveAt(choiceIndex);
@@ -280,14 +284,12 @@ public class d_MapGenerator : MonoBehaviour
                     yield return null;
                 }
 
-                Debug.Log("child0 count: " + child0Choices.Count);
                 choiceIndex = 0;
 
 
 
                 while (child1Choices.Count > choiceIndex)
                 {
-                    //Debug.Log("child1 Loop " + choiceIndex + " / " + child1Choices.Count + " " + child1Choices[choiceIndex].roomDrawn);
                     if (child1Choices[choiceIndex].roomDrawn)
                     {
                         choiceIndex++;
@@ -310,7 +312,6 @@ public class d_MapGenerator : MonoBehaviour
                             }
                         }
 
-                        //Debug.Log(choiceIndex + " removed");
                     }
 
                     child1Choices.RemoveAt(choiceIndex);
@@ -318,7 +319,6 @@ public class d_MapGenerator : MonoBehaviour
                     yield return null;
                 }
 
-                Debug.Log("child1 count: " + child1Choices.Count);
                 CorridorSegments = CorridorSegments < 1 ? 1 : CorridorSegments;
                 if (child0Choices.Count > 0 && child1Choices.Count > 0)
                 {
@@ -347,6 +347,13 @@ public class d_MapGenerator : MonoBehaviour
                                 for (int x = 0; x < Mathf.Abs(SegX); x++)
                                 {
                                     tiles[child0Center.x + (SegX * loops) + ((int)Mathf.Sign(OffsetX) * x), child0Center.y + (SegY * loops)] = true;
+                                    for (int i = 1; i < HallWideness; i++)
+                                    {
+                                        if (child0Center.y + (SegY * (loops)) - i > 0 && child0Center.y + (SegY * (loops)) < ySizeOfMap - 1 && child0Center.x + (SegX * (loops)) - i > 0 && child0Center.x + (SegX * (loops)) < xSizeOfMap - 1)
+                                        {
+                                        tiles[child0Center.x + (SegX * loops) + ((int)Mathf.Sign(OffsetX) * x) - i, child0Center.y + (SegY * (loops)) - i] = true;
+                                        }
+                                    }
                                 }
                                 writing = true;
                             }
@@ -354,7 +361,14 @@ public class d_MapGenerator : MonoBehaviour
                             {
                                 for (int y = 0; y < Mathf.Abs(SegY); y++)
                                 {
-                                    tiles[child0Center.x + (SegX * (loops+1)), child0Center.y + (SegY * loops) + ((int)Mathf.Sign(OffsetY) * y)] = true;
+                                    tiles[child0Center.x + (SegX * (loops + 1)), child0Center.y + (SegY * loops) + ((int)Mathf.Sign(OffsetY) * y)] = true; 
+                                    for (int i = 1; i < HallWideness; i++)
+                                    {
+                                        if (child0Center.y + (SegY * (loops)) - i > 0 && child0Center.y + (SegY * (loops)) < ySizeOfMap - 1 && child0Center.x + (SegX * (loops)) - i > 0 && child0Center.x + (SegX * (loops)) < xSizeOfMap - 1)
+                                        {
+                                            tiles[child0Center.x + (SegX * (loops + 1)) - i, child0Center.y + (SegY * loops) + ((int)Mathf.Sign(OffsetY) * y) - i] = true;
+                                        }
+                                    }
                                 }
                                 writing = true;
                             }
@@ -379,6 +393,13 @@ public class d_MapGenerator : MonoBehaviour
                                 for (int y = 0; y < Mathf.Abs(SegY); y++)
                                 {
                                     tiles[child0Center.x + (SegX * (loops)), child0Center.y + (SegY * loops) + ((int)Mathf.Sign(OffsetY) * y)] = true;
+                                    for (int i = 1; i < HallWideness; i++)
+                                    {
+                                        if (child0Center.y + (SegY * (loops)) - i > 0 && child0Center.y + (SegY * (loops)) < ySizeOfMap - 1 && child0Center.x + (SegX * (loops)) - i > 0 && child0Center.x + (SegX * (loops)) < xSizeOfMap - 1)
+                                        {
+                                            tiles[child0Center.x + (SegX * (loops)) - i, child0Center.y + (SegY * loops) + ((int)Mathf.Sign(OffsetY) * y) - i] = true;
+                                        }
+                                    }
                                 }
                                 writing = true;
                             }
@@ -387,6 +408,13 @@ public class d_MapGenerator : MonoBehaviour
                                 for (int x = 0; x < Mathf.Abs(SegX); x++)
                                 {
                                     tiles[child0Center.x + (SegX * loops) + ((int)Mathf.Sign(OffsetX) * x), child0Center.y + (SegY * (loops+1))] = true;
+                                    for (int i = 1; i < HallWideness; i++)
+                                    {
+                                        if (child0Center.y + (SegY * (loops)) - i > 0 && child0Center.y + (SegY * (loops)) < ySizeOfMap - 1 && child0Center.x + (SegX * (loops)) - i > 0 && child0Center.x + (SegX * (loops)) < xSizeOfMap - 1)
+                                        {
+                                            tiles[child0Center.x + (SegX * loops) + ((int)Mathf.Sign(OffsetX) * x) - i, child0Center.y + (SegY * (loops + 1)) - i] = true;
+                                        }
+                                    }
                                 }
                                 writing = true;
                             }
@@ -413,8 +441,17 @@ public class d_MapGenerator : MonoBehaviour
 
 
 
-        Debug.Log("Done");
+        Debug.Log("Map Generator - End Halls");
+        Debug.Log("Map Generator - TODO: Start Tile Generation");
 
+
+        Debug.Log("Map Generator - TODO: End Tile Generation");
+
+
+        Debug.Log("Map Generator - TODO: Start Prop Generation");
+
+
+        Debug.Log("Map Generator - TODO: End Prop Generation");
 
     }
 
