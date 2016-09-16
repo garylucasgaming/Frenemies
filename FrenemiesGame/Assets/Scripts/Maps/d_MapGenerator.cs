@@ -57,6 +57,9 @@ public class d_MapGenerator : MonoBehaviour
 
     public int EliminateRoomsSmallerOnX;
     public int EliminateRoomsSmallerOnY;
+
+    public int CorridorSegments;
+
     void Start()
     {
         StartCoroutine(GenerateMap(MapXSize, MapYSize, Subdivisions));
@@ -192,51 +195,8 @@ public class d_MapGenerator : MonoBehaviour
         OpenRooms.AddRange(ClosedRooms);
         ClosedRooms.Clear();
         
-        //while (true)
-        //{
-        //    if (OpenRooms.Count > 0)
-        //    {
-        //        d_Room child1 = OpenRooms[0].parent.children[0];
-        //        d_Room child2 = OpenRooms[0].parent.children[1];
-        //        if (OpenRooms.Contains(child1) && OpenRooms.Contains(child2))
-        //        {
-        //            int2 child1Center = new int2(child1.coords.upperLeft.x + (int)((child1.coords.lowerRight.x - child1.coords.upperLeft.x) / 2.0f), child1.coords.lowerRight.y + (int)((child1.coords.upperLeft.y - child1.coords.lowerRight.y) / 2.0f));
-        //
-        //            int2 child2Center = new int2(child2.coords.upperLeft.x + (int)((child2.coords.lowerRight.x - child2.coords.upperLeft.x) / 2.0f), child2.coords.lowerRight.y + (int)((child2.coords.upperLeft.y - child2.coords.lowerRight.y) / 2.0f));
-        //            Debug.Log("c1: " + child1Center + " c2: " + child2Center);
-        //
-        //            int OffsetX = child1Center.x - child2Center.x;
-        //
-        //            int OffsetY = child1Center.y - child2Center.y;
-        //            Debug.Log(OffsetX);
-        //            for (int x = 1; x < Mathf.Abs(OffsetX); x++)
-        //            {
-        //                tiles[(x * (int)-Mathf.Sign(OffsetX)) + child1Center.x, child1Center.y] = true;
-        //
-        //            }
-        //            for (int y = 1; y < Mathf.Abs(OffsetY); y++)
-        //            {
-        //                tiles[child1Center.x + OffsetX, (y * (int)-Mathf.Sign(OffsetY)) + child1Center.y] = true;
-        //            }
-        //            ClosedRooms.Add(child1);
-        //            ClosedRooms.Add(child2);
-        //        }
-        //        else
-        //        if (!ClosedRooms.Contains(OpenRooms[0]))
-        //        {
-        //            ClosedRooms.Add(OpenRooms[0]);
-        //        }
-        //        OpenRooms.Remove(child1);
-        //        OpenRooms.Remove(child2);
-        //
-        //    }
-        //    else
-        //    {
-        //        break;
-        //    }
-        //    yield return null;
-        //}
-        List<d_Room> hallThing = new List<d_Room>();
+
+        List<d_Room> areasToConnect = new List<d_Room>();
         //pick highest parent
         d_Room parent = OpenRooms[0];
         while (true)
@@ -248,18 +208,21 @@ public class d_MapGenerator : MonoBehaviour
         }
 
         //add all children that don't have children
-        hallThing.AddRange(parent.children);
+        areasToConnect.Add(parent);
         int c = 0;
         while (true)
         {
-            if (c < hallThing.Count)
+            if (c < areasToConnect.Count)
             {
-                if (hallThing[c].children != null)
+                if (areasToConnect[c].children != null)
                 {
-                    if (!hallThing.Contains(hallThing[c].children[0]))
-                        hallThing.Add(hallThing[c].children[0]);
-                    if (!hallThing.Contains(hallThing[c].children[1]))
-                        hallThing.Add(hallThing[c].children[1]);
+                    if (areasToConnect[c].children[0].children != null)
+                        if (!areasToConnect.Contains(areasToConnect[c].children[0]))
+                            areasToConnect.Add(areasToConnect[c].children[0]);
+
+                    if (areasToConnect[c].children[1].children != null)
+                        if (!areasToConnect.Contains(areasToConnect[c].children[1]))
+                            areasToConnect.Add(areasToConnect[c].children[1]);
                 }
                 c++;
             }
@@ -269,12 +232,181 @@ public class d_MapGenerator : MonoBehaviour
             yield return null;
         }
 
-
-        //pick a child with no children
         while (true)
         {
 
-            break;
+            //for each child with children, pick 2 children that DON'T have a child beneath it and connect them with a hall.
+            if (areasToConnect.Count > 0)
+            {
+                Debug.Log("hall loop");
+                List<d_Room> child0Choices = new List<d_Room>();
+                child0Choices.Add(areasToConnect[0].children[0]);
+                List<d_Room> child1Choices = new List<d_Room>();
+                child1Choices.Add(areasToConnect[0].children[1]);
+
+
+
+                int choiceIndex = 0;
+                while (child0Choices.Count > choiceIndex)
+                {
+                    //Debug.Log("Child0 Loop " + choiceIndex + " / " + child0Choices.Count + " " + child0Choices[choiceIndex].roomDrawn);
+                    if(child0Choices[choiceIndex].roomDrawn)
+                    {
+                        choiceIndex++;
+                        continue;
+                    }
+                    else if(child0Choices[choiceIndex].children != null)
+                    {
+                        if(child0Choices[choiceIndex].children[0] != null)
+                        {
+                            if(!child0Choices.Contains(child0Choices[choiceIndex].children[0]))
+                            {
+                                child0Choices.Add(child0Choices[choiceIndex].children[0]);
+                            }
+                        }
+                        if (child0Choices[choiceIndex].children[1] != null)
+                        {
+                            if (!child0Choices.Contains(child0Choices[choiceIndex].children[1]))
+                            {
+                                child0Choices.Add(child0Choices[choiceIndex].children[1]);
+                            }
+                        }
+
+                        //Debug.Log(choiceIndex + " removed");
+                    }
+
+                    child0Choices.RemoveAt(choiceIndex);
+
+                    yield return null;
+                }
+
+                Debug.Log("child0 count: " + child0Choices.Count);
+                choiceIndex = 0;
+
+
+
+                while (child1Choices.Count > choiceIndex)
+                {
+                    //Debug.Log("child1 Loop " + choiceIndex + " / " + child1Choices.Count + " " + child1Choices[choiceIndex].roomDrawn);
+                    if (child1Choices[choiceIndex].roomDrawn)
+                    {
+                        choiceIndex++;
+                        continue;
+                    }
+                    else if (child1Choices[choiceIndex].children != null)
+                    {
+                        if (child1Choices[choiceIndex].children[0] != null)
+                        {
+                            if (!child1Choices.Contains(child1Choices[choiceIndex].children[0]))
+                            {
+                                child1Choices.Add(child1Choices[choiceIndex].children[0]);
+                            }
+                        }
+                        if (child1Choices[choiceIndex].children[1] != null)
+                        {
+                            if (!child1Choices.Contains(child1Choices[choiceIndex].children[1]))
+                            {
+                                child1Choices.Add(child1Choices[choiceIndex].children[1]);
+                            }
+                        }
+
+                        //Debug.Log(choiceIndex + " removed");
+                    }
+
+                    child1Choices.RemoveAt(choiceIndex);
+
+                    yield return null;
+                }
+
+                Debug.Log("child1 count: " + child1Choices.Count);
+                CorridorSegments = CorridorSegments < 1 ? 1 : CorridorSegments;
+                if (child0Choices.Count > 0 && child1Choices.Count > 0)
+                {
+                    d_Room child0 = child0Choices[Random.Range(0, child0Choices.Count)];
+                    d_Room child1 = child1Choices[Random.Range(0, child1Choices.Count)];
+
+                    int2 child0Center = new int2(child0.coords.upperLeft.x + (int)((child0.coords.lowerRight.x - child0.coords.upperLeft.x) / 2.0f), child0.coords.lowerRight.y + (int)((child0.coords.upperLeft.y - child0.coords.lowerRight.y) / 2.0f));
+                    int2 child1Center = new int2(child1.coords.upperLeft.x + (int)((child1.coords.lowerRight.x - child1.coords.upperLeft.x) / 2.0f), child1.coords.lowerRight.y + (int)((child1.coords.upperLeft.y - child1.coords.lowerRight.y) / 2.0f));
+
+                    int OffsetX = child1Center.x - child0Center.x;
+                                                 
+                    int OffsetY = child1Center.y - child0Center.y;
+
+                    bool UseXSegmentFirst = Mathf.Abs(OffsetX) > Mathf.Abs(OffsetY) ? true : false;
+                    
+                    if (UseXSegmentFirst)
+                    {
+                        int loops = 0;
+                        int SegX = OffsetX / CorridorSegments;
+                        int SegY = OffsetY / CorridorSegments;
+                        while(true)
+                        {
+                            bool writing = false;
+                            if (loops < CorridorSegments)
+                            {
+                                for (int x = 0; x < Mathf.Abs(SegX); x++)
+                                {
+                                    tiles[child0Center.x + (SegX * loops) + ((int)Mathf.Sign(OffsetX) * x), child0Center.y + (SegY * loops)] = true;
+                                }
+                                writing = true;
+                            }
+                            if (loops < CorridorSegments)
+                            {
+                                for (int y = 0; y < Mathf.Abs(SegY); y++)
+                                {
+                                    tiles[child0Center.x + (SegX * (loops+1)), child0Center.y + (SegY * loops) + ((int)Mathf.Sign(OffsetY) * y)] = true;
+                                }
+                                writing = true;
+                            }
+                            loops++;
+
+                            if (!writing)
+                                break;
+
+                            yield return null;
+                        }
+                    }
+                    else
+                    {
+                        int loops = 0;
+                        int SegX = OffsetX / CorridorSegments;
+                        int SegY = OffsetY / CorridorSegments;
+                        while (true)
+                        {
+                            bool writing = false;
+                            if (loops < CorridorSegments)
+                            {
+                                for (int y = 0; y < Mathf.Abs(SegY); y++)
+                                {
+                                    tiles[child0Center.x + (SegX * (loops)), child0Center.y + (SegY * loops) + ((int)Mathf.Sign(OffsetY) * y)] = true;
+                                }
+                                writing = true;
+                            }
+                            if (loops < CorridorSegments)
+                            {
+                                for (int x = 0; x < Mathf.Abs(SegX); x++)
+                                {
+                                    tiles[child0Center.x + (SegX * loops) + ((int)Mathf.Sign(OffsetX) * x), child0Center.y + (SegY * (loops+1))] = true;
+                                }
+                                writing = true;
+                            }
+                            
+                            loops++;
+
+                            if (!writing)
+                                break;
+
+                            yield return null;
+                        }
+                    }
+                }
+                areasToConnect.RemoveAt(0);
+
+
+            }
+            else
+                break;
+
             yield return null;
         }
 

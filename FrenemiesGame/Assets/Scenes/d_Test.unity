@@ -206,13 +206,14 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   MapXSize: 64
   MapYSize: 64
-  Subdivisions: 5
-  SubdivisionXRange: {x: 0.1, y: 0.9}
-  SubdivisionYRange: {x: 0.1, y: 0.9}
+  Subdivisions: 6
+  SubdivisionXRange: {x: 0.45, y: 0.55}
+  SubdivisionYRange: {x: 0.45, y: 0.55}
   RoomXRange: {x: 0.75, y: 0.8}
   RoomYRange: {x: 0.7, y: 0.95}
-  EliminateRoomsSmallerOnX: 6
-  EliminateRoomsSmallerOnY: 6
+  EliminateRoomsSmallerOnX: 3
+  EliminateRoomsSmallerOnY: 3
+  CorridorSegments: 1
 --- !u!4 &1315679834
 Transform:
   m_ObjectHideFlags: 0
