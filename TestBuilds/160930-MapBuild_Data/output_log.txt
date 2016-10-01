@@ -1,0 +1,68 @@
+Initialize engine version: 5.4.0f3 (a6d8d714de6f)
+GfxDevice: creating device client; threaded=1
+Direct3D:
+    Version:  Direct3D 11.0 [level 11.0]
+    Renderer: NVIDIA GeForce GTX 770 (ID=0x1184)
+    Vendor:   NVIDIA
+    VRAM:     2017 MB
+Begin MonoManager ReloadAssembly
+Platform assembly: B:\Work\CodingExercises\Frenemies\TestBuilds\160930-MapBuild_Data\Managed\UnityEngine.dll (this message is harmless)
+Loading B:\Work\CodingExercises\Frenemies\TestBuilds\160930-MapBuild_Data\Managed\UnityEngine.dll into Unity Child Domain
+Platform assembly: B:\Work\CodingExercises\Frenemies\TestBuilds\160930-MapBuild_Data\Managed\Assembly-CSharp-firstpass.dll (this message is harmless)
+Loading B:\Work\CodingExercises\Frenemies\TestBuilds\160930-MapBuild_Data\Managed\Assembly-CSharp-firstpass.dll into Unity Child Domain
+Platform assembly: B:\Work\CodingExercises\Frenemies\TestBuilds\160930-MapBuild_Data\Managed\Assembly-CSharp.dll (this message is harmless)
+Loading B:\Work\CodingExercises\Frenemies\TestBuilds\160930-MapBuild_Data\Managed\Assembly-CSharp.dll into Unity Child Domain
+Platform assembly: B:\Work\CodingExercises\Frenemies\TestBuilds\160930-MapBuild_Data\Managed\UnityEngine.UI.dll (this message is harmless)
+Loading B:\Work\CodingExercises\Frenemies\TestBuilds\160930-MapBuild_Data\Managed\UnityEngine.UI.dll into Unity Child Domain
+Platform assembly: B:\Work\CodingExercises\Frenemies\TestBuilds\160930-MapBuild_Data\Managed\UnityEngine.Networking.dll (this message is harmless)
+Loading B:\Work\CodingExercises\Frenemies\TestBuilds\160930-MapBuild_Data\Managed\UnityEngine.Networking.dll into Unity Child Domain
+- Completed reload, in  0.138 seconds
+Platform assembly: B:\Work\CodingExercises\Frenemies\TestBuilds\160930-MapBuild_Data\Managed\System.Core.dll (this message is harmless)
+Platform assembly: B:\Work\CodingExercises\Frenemies\TestBuilds\160930-MapBuild_Data\Managed\System.dll (this message is harmless)
+desktop: 1920x1080 60Hz; virtual: 3280x1080 at 0,0
+<RI> Initializing input.
+<RI> Input initialized.
+<RI> Initialized touch support.
+UnloadTime: 0.668996 ms
+Map Generator - Start Rooms
+ 
+(Filename: C:/buildslave/unity/build/artifacts/generated/common/runtime/UnityEngineDebugBindings.gen.cpp Line: 42)
+
+Map Generator - End Rooms
+ 
+(Filename: C:/buildslave/unity/build/artifacts/generated/common/runtime/UnityEngineDebugBindings.gen.cpp Line: 42)
+
+Map Generator - Start Halls
+ 
+(Filename: C:/buildslave/unity/build/artifacts/generated/common/runtime/UnityEngineDebugBindings.gen.cpp Line: 42)
+
+Map Generator - TODO: Start Room Tiling
+ 
+(Filename: C:/buildslave/unity/build/artifacts/generated/common/runtime/UnityEngineDebugBindings.gen.cpp Line: 42)
+
+Map Generator - TODO: End Room Tiling
+ 
+(Filename: C:/buildslave/unity/build/artifacts/generated/common/runtime/UnityEngineDebugBindings.gen.cpp Line: 42)
+
+Map Generator - End Halls
+ 
+(Filename: C:/buildslave/unity/build/artifacts/generated/common/runtime/UnityEngineDebugBindings.gen.cpp Line: 42)
+
+Map Generator - TODO: Start Tile Generation
+ 
+(Filename: C:/buildslave/unity/build/artifacts/generated/common/runtime/UnityEngineDebugBindings.gen.cpp Line: 42)
+
+Map Generator - TODO: End Tile Generation
+ 
+(Filename: C:/buildslave/unity/build/artifacts/generated/common/runtime/UnityEngineDebugBindings.gen.cpp Line: 42)
+
+Map Generator - TODO: Start Prop Generation
+ 
+(Filename: C:/buildslave/unity/build/artifacts/generated/common/runtime/UnityEngineDebugBindings.gen.cpp Line: 42)
+
+Map Generator - TODO: End Prop Generation
+ 
+(Filename: C:/buildslave/unity/build/artifacts/generated/common/runtime/UnityEngineDebugBindings.gen.cpp Line: 42)
+
+Setting up 1 worker threads for Enlighten.
+  Thread -> id: 4430 -> priority: 1 
