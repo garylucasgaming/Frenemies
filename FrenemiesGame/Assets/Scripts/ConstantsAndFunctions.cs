@@ -33,6 +33,27 @@ namespace CommonStructs
         }
     }
 
+    public enum TileType
+    {
+        Undeclared = 0,
+        Floor = 1,
+        DoorFrame = 2,
+        Computer = 3,
+        WallSolid = 4,
+        WallSingleEdge = 5,
+        WallDoubleEdge = 6,
+        WallEnd = 7,
+        WallNub = 8,
+        WallCrescent = 9,
+        WallGibbous = 10,
+        TableEnd = 11,
+        TableMiddle = 12,
+        Hall = 13
+
+    }
+
+
+
 
 
 }

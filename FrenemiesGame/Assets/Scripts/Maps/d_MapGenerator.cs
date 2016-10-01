@@ -11,6 +11,27 @@ public struct d_DungeonCoordinates
     public int2 upperLeft;
     public int2 lowerRight;
 }
+public struct d_TileInfo
+{
+    public TileType type;
+    public Color color;
+
+}
+[System.Flags]
+public enum Props 
+{
+    Desk = 1,
+    Table = 2,
+    Computer = 4,
+    VendingMachine = 8
+}
+public class d_RoomData
+{
+    public string name = "";
+    public Props roomProps;
+}
+
+
 public class d_Room
 {
     public d_DungeonCoordinates coords;
@@ -45,6 +66,7 @@ public class d_Room
 public class d_MapGenerator : MonoBehaviour
 {
     public bool[,] tiles;
+    public d_TileInfo[,] output;
     public int MapXSize;
     public int MapYSize;
 
@@ -61,15 +83,60 @@ public class d_MapGenerator : MonoBehaviour
     public int CorridorSegments;
     public int MinimumChokePoints;
     public int HallWideness = 1;
+    public bool generating = false;
+    [SerializeField]
+    d_RoomData[] Rooms;
+    SpriteRenderer[,] Sprites;
 
     void Start()
     {
-        StartCoroutine(GenerateMap(MapXSize, MapYSize, Subdivisions));
+        StartCoroutine(GenerateMap());
+        Sprites = new SpriteRenderer[tiles.GetLength(0), tiles.GetLength(1)];
+        int tx = 64;
+        Texture2D t2D = new Texture2D(tx,tx);
+        for (int x = 0; x < tiles.GetLength(0); x++)
+        {
+            for (int y = 0; y < tiles.GetLength(1); y++)
+            {
+                GameObject go = new GameObject("Sprite");
+                go.transform.parent = this.transform;
+                go.transform.position = new Vector2(x, y);
+                Sprites[x,y] = go.AddComponent<SpriteRenderer>();
+                Color[] cols = new Color[tx*tx];
+                for (int i = 0; i < tx*tx; i++)
+                {
+                    cols[i] = Color.white;
+                }
+                t2D.SetPixels(cols);
+                Sprites[x, y].sprite = Sprite.Create(t2D, new Rect(0, 0, tx, tx), new Vector2(0.5f, 0.5f));
+                
+            }
+        }
+
     }
-    IEnumerator GenerateMap(int xSizeOfMap, int ySizeOfMap, int deepestDivisionLevel = 3)
+
+    void Update()
     {
+        if(!generating)
+        for(int x = 0; x < tiles.GetLength(0); x++)
+        {
+            for (int y = 0; y < tiles.GetLength(1); y++)
+            {
+                if (Sprites[x, y].color != output[x, y].color)
+                {
+                    Sprites[x, y].color = output[x, y].color;
+                }
+            }
+        }
+    }
+    
+    public IEnumerator GenerateMap()
+    {
+        generating = true;
         bool horizontalSubdivision;
-        tiles = new bool[xSizeOfMap, ySizeOfMap];
+        tiles = new bool[MapXSize, MapYSize];
+
+        output = new d_TileInfo[MapXSize, MapYSize];
         for (int y = 0; y < tiles.GetLength(1); y++)
         {
             for (int x = 0; x < tiles.GetLength(0); x++)
@@ -79,19 +146,20 @@ public class d_MapGenerator : MonoBehaviour
         }
 
         List<d_Room> OpenRooms = new List<d_Room>();
+        List<d_Room> ClosedRooms = new List<d_Room>();
+
 
         OpenRooms.Add(new d_Room().Init());
-        OpenRooms[0].coords.upperLeft = new int2(0, ySizeOfMap - 1);
+        OpenRooms[0].coords.upperLeft = new int2(0, MapYSize - 1);
 
-        OpenRooms[0].coords.lowerRight = new int2(xSizeOfMap - 1, 0);
-        List<d_Room> ClosedRooms = new List<d_Room>();
+        OpenRooms[0].coords.lowerRight = new int2(MapXSize - 1, 0);
 
         Debug.Log("Map Generator - Start Rooms");
         while (true)
         {
             if (OpenRooms.Count > 0)
             {
-                if (OpenRooms[0].subdivisionLevel <= deepestDivisionLevel)
+                if (OpenRooms[0].subdivisionLevel <= Subdivisions)
                 {
                     d_Room[] children = new d_Room[2];
                     children[0] = new d_Room().Init(OpenRooms[0]);
@@ -165,7 +233,7 @@ public class d_MapGenerator : MonoBehaviour
                         {
                             for (int y = OpenRooms[0].coords.lowerRight.y; y < OpenRooms[0].coords.upperLeft.y; y++)
                             {
-                                if (x == 0 || x == xSizeOfMap - 1 || y == 0 || y == ySizeOfMap - 1)
+                                if (x == 0 || x == MapXSize - 1 || y == 0 || y == MapYSize - 1)
                                 {
                                     addToClosed = false;
                                 }
@@ -200,6 +268,8 @@ public class d_MapGenerator : MonoBehaviour
 
         Debug.Log("Map Generator - Start Halls");
         List<d_Room> areasToConnect = new List<d_Room>();
+        List<d_Room> DrawnRooms = new List<d_Room>();
+        List<d_Room> ClosedDrawnRooms = new List<d_Room>();
         //pick highest parent
         d_Room parent = OpenRooms[0];
         while (true)
@@ -238,6 +308,44 @@ public class d_MapGenerator : MonoBehaviour
 
             yield return null;
         }
+        DrawnRooms.AddRange(areasToConnect);
+
+        Debug.Log("Map Generator - TODO: Start Room Tiling");
+
+        while (DrawnRooms.Count > 0)
+        {
+
+
+
+            for (int x = DrawnRooms[0].coords.upperLeft.x; x < DrawnRooms[0].coords.lowerRight.x; x++)
+            {
+                for (int y = DrawnRooms[0].coords.lowerRight.y; y < DrawnRooms[0].coords.upperLeft.y; y++)
+                {
+                    output[x, y].color = tiles[x, y] ? Color.white : Color.black;
+                    output[x, y].type = tiles[x, y] ? TileType.Floor : TileType.WallSolid;
+                }
+            }
+
+
+
+            ClosedDrawnRooms.Add(DrawnRooms[0]);
+            DrawnRooms.RemoveAt(0);
+            yield return null;
+        }
+
+
+
+
+
+        Debug.Log("Map Generator - TODO: End Room Tiling");
+        DrawnRooms.AddRange(ClosedDrawnRooms);
+        ClosedDrawnRooms.Clear();
+
+
+
+
+
+
 
         while (true)
         {
@@ -346,12 +454,23 @@ public class d_MapGenerator : MonoBehaviour
                             {
                                 for (int x = 0; x < Mathf.Abs(SegX); x++)
                                 {
-                                    tiles[child0Center.x + (SegX * loops) + ((int)Mathf.Sign(OffsetX) * x), child0Center.y + (SegY * loops)] = true;
+                                    if (tiles[child0Center.x + (SegX * loops) + ((int)Mathf.Sign(OffsetX) * x), child0Center.y + (SegY * loops)] != true)
+                                    {
+                                        tiles[child0Center.x + (SegX * loops) + ((int)Mathf.Sign(OffsetX) * x), child0Center.y + (SegY * loops)] = true;
+                                        output[child0Center.x + (SegX * loops) + ((int)Mathf.Sign(OffsetX) * x), child0Center.y + (SegY * loops)].type = TileType.Hall;
+                                        output[child0Center.x + (SegX * loops) + ((int)Mathf.Sign(OffsetX) * x), child0Center.y + (SegY * loops)].color = Color.red;
+                                    }
+
                                     for (int i = 1; i < HallWideness; i++)
                                     {
-                                        if (child0Center.y + (SegY * (loops)) - i > 0 && child0Center.y + (SegY * (loops)) < ySizeOfMap - 1 && child0Center.x + (SegX * (loops)) - i > 1 && child0Center.x + (SegX * (loops)) < xSizeOfMap - 1)
+                                        if (child0Center.y + (SegY * (loops)) - i > 0 && child0Center.y + (SegY * (loops)) < MapYSize - 1 && child0Center.x + (SegX * (loops)) - i > 1 && child0Center.x + (SegX * (loops)) < MapXSize - 1)
                                         {
-                                        tiles[child0Center.x + (SegX * loops) + ((int)Mathf.Sign(OffsetX) * x) - i, child0Center.y + (SegY * (loops)) - i] = true;
+                                            if (tiles[child0Center.x + (SegX * loops) + ((int)Mathf.Sign(OffsetX) * x) - i, child0Center.y + (SegY * (loops)) - i] != true)
+                                            {
+                                                tiles[child0Center.x + (SegX * loops) + ((int)Mathf.Sign(OffsetX) * x) - i, child0Center.y + (SegY * (loops)) - i] = true;
+                                                output[child0Center.x + (SegX * loops) + ((int)Mathf.Sign(OffsetX) * x) - i, child0Center.y + (SegY * (loops)) - i].type = TileType.Hall;
+                                                output[child0Center.x + (SegX * loops) + ((int)Mathf.Sign(OffsetX) * x) - i, child0Center.y + (SegY * (loops)) - i].color = Color.red;
+                                            }
                                         }
                                     }
                                 }
@@ -361,12 +480,23 @@ public class d_MapGenerator : MonoBehaviour
                             {
                                 for (int y = 0; y < Mathf.Abs(SegY); y++)
                                 {
-                                    tiles[child0Center.x + (SegX * (loops + 1)), child0Center.y + (SegY * loops) + ((int)Mathf.Sign(OffsetY) * y)] = true; 
+                                    if (tiles[child0Center.x + (SegX * (loops + 1)), child0Center.y + (SegY * loops) + ((int)Mathf.Sign(OffsetY) * y)] != true)
+                                    {
+                                        tiles[child0Center.x + (SegX * (loops + 1)), child0Center.y + (SegY * loops) + ((int)Mathf.Sign(OffsetY) * y)] = true;
+
+                                        output[child0Center.x + (SegX * (loops + 1)), child0Center.y + (SegY * loops) + ((int)Mathf.Sign(OffsetY) * y)].type = TileType.Hall;
+                                        output[child0Center.x + (SegX * (loops + 1)), child0Center.y + (SegY * loops) + ((int)Mathf.Sign(OffsetY) * y)].color = Color.red;
+                                    }
                                     for (int i = 1; i < HallWideness; i++)
                                     {
-                                        if (child0Center.y + (SegY * (loops)) - i > 0 && child0Center.y + (SegY * (loops)) < ySizeOfMap - 1 && child0Center.x + (SegX * (loops)) - i > 1 && child0Center.x + (SegX * (loops)) < xSizeOfMap - 1)
+                                        if (child0Center.y + (SegY * (loops)) - i > 0 && child0Center.y + (SegY * (loops)) < MapYSize - 1 && child0Center.x + (SegX * (loops)) - i > 1 && child0Center.x + (SegX * (loops)) < MapXSize - 1)
                                         {
-                                            tiles[child0Center.x + (SegX * (loops + 1)) - i, child0Center.y + (SegY * loops) + ((int)Mathf.Sign(OffsetY) * y) - i] = true;
+                                            if (tiles[child0Center.x + (SegX * (loops + 1)) - i, child0Center.y + (SegY * loops) + ((int)Mathf.Sign(OffsetY) * y) - i] != true)
+                                            {
+                                                tiles[child0Center.x + (SegX * (loops + 1)) - i, child0Center.y + (SegY * loops) + ((int)Mathf.Sign(OffsetY) * y) - i] = true;
+                                                output[child0Center.x + (SegX * (loops + 1)) - i, child0Center.y + (SegY * loops) + ((int)Mathf.Sign(OffsetY) * y) - i].type = TileType.Hall;
+                                                output[child0Center.x + (SegX * (loops + 1)) - i, child0Center.y + (SegY * loops) + ((int)Mathf.Sign(OffsetY) * y) - i].color = Color.red;
+                                            }
                                         }
                                     }
                                 }
@@ -392,12 +522,22 @@ public class d_MapGenerator : MonoBehaviour
                             {
                                 for (int y = 0; y < Mathf.Abs(SegY); y++)
                                 {
-                                    tiles[child0Center.x + (SegX * (loops)), child0Center.y + (SegY * loops) + ((int)Mathf.Sign(OffsetY) * y)] = true;
+                                    if (tiles[child0Center.x + (SegX * (loops)), child0Center.y + (SegY * loops) + ((int)Mathf.Sign(OffsetY) * y)] != true)
+                                    {
+                                        tiles[child0Center.x + (SegX * (loops)), child0Center.y + (SegY * loops) + ((int)Mathf.Sign(OffsetY) * y)] = true;
+                                        output[child0Center.x + (SegX * (loops)), child0Center.y + (SegY * loops) + ((int)Mathf.Sign(OffsetY) * y)].type = TileType.Hall;
+                                        output[child0Center.x + (SegX * (loops)), child0Center.y + (SegY * loops) + ((int)Mathf.Sign(OffsetY) * y)].color = Color.red;
+                                    }
                                     for (int i = 1; i < HallWideness; i++)
                                     {
-                                        if (child0Center.y + (SegY * (loops)) - i > 0 && child0Center.y + (SegY * (loops)) < ySizeOfMap - 1 && child0Center.x + (SegX * (loops)) - i > 1 && child0Center.x + (SegX * (loops)) < xSizeOfMap - 1)
+                                        if (child0Center.y + (SegY * (loops)) - i > 0 && child0Center.y + (SegY * (loops)) < MapYSize - 1 && child0Center.x + (SegX * (loops)) - i > 1 && child0Center.x + (SegX * (loops)) < MapXSize - 1)
                                         {
-                                            tiles[child0Center.x + (SegX * (loops)) - i, child0Center.y + (SegY * loops) + ((int)Mathf.Sign(OffsetY) * y) - i] = true;
+                                            if (tiles[child0Center.x + (SegX * (loops)) - i, child0Center.y + (SegY * loops) + ((int)Mathf.Sign(OffsetY) * y) - i] != true)
+                                            {
+                                                tiles[child0Center.x + (SegX * (loops)) - i, child0Center.y + (SegY * loops) + ((int)Mathf.Sign(OffsetY) * y) - i] = true;
+                                                output[child0Center.x + (SegX * (loops)) - i, child0Center.y + (SegY * loops) + ((int)Mathf.Sign(OffsetY) * y) - i].type = TileType.Hall;
+                                                output[child0Center.x + (SegX * (loops)) - i, child0Center.y + (SegY * loops) + ((int)Mathf.Sign(OffsetY) * y) - i].color = Color.red;
+                                            }
                                         }
                                     }
                                 }
@@ -407,12 +547,22 @@ public class d_MapGenerator : MonoBehaviour
                             {
                                 for (int x = 0; x < Mathf.Abs(SegX); x++)
                                 {
-                                    tiles[child0Center.x + (SegX * loops) + ((int)Mathf.Sign(OffsetX) * x), child0Center.y + (SegY * (loops+1))] = true;
+                                    if (tiles[child0Center.x + (SegX * loops) + ((int)Mathf.Sign(OffsetX) * x), child0Center.y + (SegY * (loops + 1))] != true)
+                                    {
+                                        tiles[child0Center.x + (SegX * loops) + ((int)Mathf.Sign(OffsetX) * x), child0Center.y + (SegY * (loops + 1))] = true;
+                                        output[child0Center.x + (SegX * loops) + ((int)Mathf.Sign(OffsetX) * x), child0Center.y + (SegY * (loops + 1))].type = TileType.Hall;
+                                        output[child0Center.x + (SegX * loops) + ((int)Mathf.Sign(OffsetX) * x), child0Center.y + (SegY * (loops + 1))].color = Color.red;
+                                    }
                                     for (int i = 1; i < HallWideness; i++)
                                     {
-                                        if (child0Center.y + (SegY * (loops)) - i > 0 && child0Center.y + (SegY * (loops)) < ySizeOfMap - 1 && child0Center.x + (SegX * (loops)) - i > 1 && child0Center.x + (SegX * (loops)) < xSizeOfMap - 1)
+                                        if (child0Center.y + (SegY * (loops)) - i > 0 && child0Center.y + (SegY * (loops)) < MapYSize - 1 && child0Center.x + (SegX * (loops)) - i > 1 && child0Center.x + (SegX * (loops)) < MapXSize - 1)
                                         {
-                                            tiles[child0Center.x + (SegX * loops) + ((int)Mathf.Sign(OffsetX) * x) - i, child0Center.y + (SegY * (loops + 1)) - i] = true;
+                                            if (tiles[child0Center.x + (SegX * loops) + ((int)Mathf.Sign(OffsetX) * x) - i, child0Center.y + (SegY * (loops + 1)) - i] != true)
+                                            {
+                                                tiles[child0Center.x + (SegX * loops) + ((int)Mathf.Sign(OffsetX) * x) - i, child0Center.y + (SegY * (loops + 1)) - i] = true;
+                                                output[child0Center.x + (SegX * loops) + ((int)Mathf.Sign(OffsetX) * x) - i, child0Center.y + (SegY * (loops + 1)) - i].type = TileType.Hall;
+                                                output[child0Center.x + (SegX * loops) + ((int)Mathf.Sign(OffsetX) * x) - i, child0Center.y + (SegY * (loops + 1)) - i].color = Color.red;
+                                            }
                                         }
                                     }
                                 }
@@ -438,11 +588,77 @@ public class d_MapGenerator : MonoBehaviour
             yield return null;
         }
 
-
-
-
         Debug.Log("Map Generator - End Halls");
+
+
         Debug.Log("Map Generator - TODO: Start Tile Generation");
+            List<int2> coordsToFill = new List<int2>();
+            int2 start = new int2(MapXSize / 2, MapYSize / 2);
+            coordsToFill.Add(start);
+            int iterator = 0;
+
+            while (coordsToFill.Count > iterator)
+            {
+                int x = coordsToFill[iterator].x;
+                int y = coordsToFill[iterator].y;
+                if (output[x, y].type == TileType.Floor)
+                    output[x, y].color = Color.blue;
+                //Add top
+                if (y + 1 < output.GetLength(1))
+                {
+                    if (!coordsToFill.Contains(new int2(x, y + 1)))
+                        coordsToFill.Add(new int2(x, y + 1));
+
+                    if (output[x, y + 1].type == TileType.Hall && output[x,y].type == TileType.Floor)
+                    {
+                        output[x, y + 1].color = Color.yellow;
+                        output[x, y + 1].type = TileType.DoorFrame;
+                    }
+                }
+                //Add bottom
+                if (y - 1 > 0)
+                {
+                    if (!coordsToFill.Contains(new int2(x, y - 1)))
+                        coordsToFill.Add(new int2(x, y - 1));
+
+                    if (output[x, y - 1].type == TileType.Hall && output[x, y].type == TileType.Floor)
+                    {
+                        output[x, y - 1].color = Color.yellow;
+                        output[x, y - 1].type = TileType.DoorFrame;
+                    }
+                }
+                //Add left
+                if (x - 1 > 0)
+                {
+                    if (!coordsToFill.Contains(new int2(x - 1, y)))
+                        coordsToFill.Add(new int2(x - 1, y));
+
+                    if (output[x - 1, y].type == TileType.Hall && output[x, y].type == TileType.Floor)
+                    {
+                        output[x - 1, y].color = Color.yellow;
+                        output[x - 1, y].type = TileType.DoorFrame;
+                    }
+                }
+                //Add right
+                if (x + 1 < output.GetLength(0))
+                {
+                    if (!coordsToFill.Contains(new int2(x + 1, y)))
+                        coordsToFill.Add(new int2(x + 1, y));
+
+                    if (output[x + 1, y].type == TileType.Hall && output[x, y].type == TileType.Floor)
+                    {
+                        output[x + 1, y].color = Color.yellow;
+                        output[x + 1, y].type = TileType.DoorFrame;
+                    }
+                }
+                //increment past this
+                iterator++;
+                yield return null;
+
+            }
+
+
+
 
 
         Debug.Log("Map Generator - TODO: End Tile Generation");
@@ -452,7 +668,7 @@ public class d_MapGenerator : MonoBehaviour
 
 
         Debug.Log("Map Generator - TODO: End Prop Generation");
-
+        generating = false;
     }
 
 #if UNITY_EDITOR
