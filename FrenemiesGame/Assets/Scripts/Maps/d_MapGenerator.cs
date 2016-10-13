@@ -18,7 +18,7 @@ public struct d_TileInfo
 
 }
 [System.Flags]
-public enum Props 
+public enum Props
 {
     Desk = 1,
     Table = 2,
@@ -92,8 +92,8 @@ public class d_MapGenerator : MonoBehaviour
     {
         StartCoroutine(GenerateMap());
         Sprites = new SpriteRenderer[tiles.GetLength(0), tiles.GetLength(1)];
-        int tx = 64;
-        Texture2D t2D = new Texture2D(tx,tx);
+        int tx = 128;
+        Texture2D t2D = new Texture2D(tx, tx);
         for (int x = 0; x < tiles.GetLength(0); x++)
         {
             for (int y = 0; y < tiles.GetLength(1); y++)
@@ -101,15 +101,15 @@ public class d_MapGenerator : MonoBehaviour
                 GameObject go = new GameObject("Sprite");
                 go.transform.parent = this.transform;
                 go.transform.position = new Vector2(x, y);
-                Sprites[x,y] = go.AddComponent<SpriteRenderer>();
-                Color[] cols = new Color[tx*tx];
-                for (int i = 0; i < tx*tx; i++)
+                Sprites[x, y] = go.AddComponent<SpriteRenderer>();
+                Color[] cols = new Color[tx * tx];
+                for (int i = 0; i < tx * tx; i++)
                 {
                     cols[i] = Color.white;
                 }
                 t2D.SetPixels(cols);
                 Sprites[x, y].sprite = Sprite.Create(t2D, new Rect(0, 0, tx, tx), new Vector2(0.5f, 0.5f));
-                
+
             }
         }
 
@@ -117,19 +117,19 @@ public class d_MapGenerator : MonoBehaviour
 
     void Update()
     {
-        if(!generating)
-        for(int x = 0; x < tiles.GetLength(0); x++)
-        {
-            for (int y = 0; y < tiles.GetLength(1); y++)
+        if (!generating)
+            for (int x = 0; x < tiles.GetLength(0); x++)
             {
-                if (Sprites[x, y].color != output[x, y].color)
+                for (int y = 0; y < tiles.GetLength(1); y++)
                 {
-                    Sprites[x, y].color = output[x, y].color;
+                    if (Sprites[x, y].color != output[x, y].color)
+                    {
+                        Sprites[x, y].color = output[x, y].color;
+                    }
                 }
             }
-        }
     }
-    
+
     public IEnumerator GenerateMap()
     {
         generating = true;
@@ -239,17 +239,17 @@ public class d_MapGenerator : MonoBehaviour
                                 }
                                 else
                                 {
-                                    tilesToTurn.Add(new int2(x,y));
+                                    tilesToTurn.Add(new int2(x, y));
                                 }
                             }
                         }
-                        if(addToClosed)
+                        if (addToClosed)
                         {
                             OpenRooms[0].roomDrawn = true;
                             ClosedRooms.Add(OpenRooms[0]);
-                            for(int i = 0; i < tilesToTurn.Count; i++)
+                            for (int i = 0; i < tilesToTurn.Count; i++)
                             {
-                                tiles[tilesToTurn[i].x,tilesToTurn[i].y] = true;
+                                tiles[tilesToTurn[i].x, tilesToTurn[i].y] = true;
                             }
                         }
                     }
@@ -363,16 +363,16 @@ public class d_MapGenerator : MonoBehaviour
                 int choiceIndex = 0;
                 while (child0Choices.Count > choiceIndex)
                 {
-                    if(child0Choices[choiceIndex].roomDrawn)
+                    if (child0Choices[choiceIndex].roomDrawn)
                     {
                         choiceIndex++;
                         continue;
                     }
-                    else if(child0Choices[choiceIndex].children != null)
+                    else if (child0Choices[choiceIndex].children != null)
                     {
-                        if(child0Choices[choiceIndex].children[0] != null)
+                        if (child0Choices[choiceIndex].children[0] != null)
                         {
-                            if(!child0Choices.Contains(child0Choices[choiceIndex].children[0]))
+                            if (!child0Choices.Contains(child0Choices[choiceIndex].children[0]))
                             {
                                 child0Choices.Add(child0Choices[choiceIndex].children[0]);
                             }
@@ -437,40 +437,49 @@ public class d_MapGenerator : MonoBehaviour
                     int2 child1Center = new int2(child1.coords.upperLeft.x + (int)((child1.coords.lowerRight.x - child1.coords.upperLeft.x) / 2.0f), child1.coords.lowerRight.y + (int)((child1.coords.upperLeft.y - child1.coords.lowerRight.y) / 2.0f));
 
                     int OffsetX = child1Center.x - child0Center.x;
-                                                 
+
                     int OffsetY = child1Center.y - child0Center.y;
 
                     bool UseXSegmentFirst = Mathf.Abs(OffsetX) > Mathf.Abs(OffsetY) ? true : false;
-                    
+
                     if (UseXSegmentFirst)
                     {
                         int loops = 0;
                         int SegX = OffsetX / CorridorSegments;
                         int SegY = OffsetY / CorridorSegments;
-                        while(true)
+                        while (true)
                         {
                             bool writing = false;
                             if (loops < CorridorSegments)
                             {
                                 for (int x = 0; x < Mathf.Abs(SegX); x++)
                                 {
-                                    if (tiles[child0Center.x + (SegX * loops) + ((int)Mathf.Sign(OffsetX) * x), child0Center.y + (SegY * loops)] != true)
+                                    if (output[child0Center.x + (SegX * loops) + ((int)Mathf.Sign(OffsetX) * x), child0Center.y + (SegY * loops)].type != TileType.Floor)
                                     {
                                         tiles[child0Center.x + (SegX * loops) + ((int)Mathf.Sign(OffsetX) * x), child0Center.y + (SegY * loops)] = true;
-                                        output[child0Center.x + (SegX * loops) + ((int)Mathf.Sign(OffsetX) * x), child0Center.y + (SegY * loops)].type = TileType.Hall;
-                                        output[child0Center.x + (SegX * loops) + ((int)Mathf.Sign(OffsetX) * x), child0Center.y + (SegY * loops)].color = Color.red;
-                                    }
-
-                                    for (int i = 1; i < HallWideness; i++)
-                                    {
-                                        if (child0Center.y + (SegY * (loops)) - i > 0 && child0Center.y + (SegY * (loops)) < MapYSize - 1 && child0Center.x + (SegX * (loops)) - i > 1 && child0Center.x + (SegX * (loops)) < MapXSize - 1)
+                                        bool effected = false;
+                                        if (output[child0Center.x + (SegX * loops) + ((int)Mathf.Sign(OffsetX) * x) + 1, child0Center.y + (SegY * loops)].type == TileType.Floor)
                                         {
-                                            if (tiles[child0Center.x + (SegX * loops) + ((int)Mathf.Sign(OffsetX) * x) - i, child0Center.y + (SegY * (loops)) - i] != true)
+                                            if (output[child0Center.x + (SegX * loops) + ((int)Mathf.Sign(OffsetX) * x), child0Center.y + (SegY * loops) - 1].type != TileType.Hall && output[child0Center.x + (SegX * loops) + ((int)Mathf.Sign(OffsetX) * x), child0Center.y + (SegY * loops) + 1].type != TileType.Hall)
                                             {
-                                                tiles[child0Center.x + (SegX * loops) + ((int)Mathf.Sign(OffsetX) * x) - i, child0Center.y + (SegY * (loops)) - i] = true;
-                                                output[child0Center.x + (SegX * loops) + ((int)Mathf.Sign(OffsetX) * x) - i, child0Center.y + (SegY * (loops)) - i].type = TileType.Hall;
-                                                output[child0Center.x + (SegX * loops) + ((int)Mathf.Sign(OffsetX) * x) - i, child0Center.y + (SegY * (loops)) - i].color = Color.red;
+                                                output[child0Center.x + (SegX * loops) + ((int)Mathf.Sign(OffsetX) * x), child0Center.y + (SegY * loops)].type = TileType.DoorFrame;
+                                                output[child0Center.x + (SegX * loops) + ((int)Mathf.Sign(OffsetX) * x), child0Center.y + (SegY * loops)].color = Color.yellow;
+                                                effected = true;
                                             }
+                                        }
+                                        else if (output[child0Center.x + (SegX * loops) + ((int)Mathf.Sign(OffsetX) * x) - 1, child0Center.y + (SegY * loops)].type == TileType.Floor)
+                                        {
+                                            if (output[child0Center.x + (SegX * loops) + ((int)Mathf.Sign(OffsetX) * x), child0Center.y + (SegY * loops) - 1].type != TileType.Hall && output[child0Center.x + (SegX * loops) + ((int)Mathf.Sign(OffsetX) * x), child0Center.y + (SegY * loops) + 1].type != TileType.Hall)
+                                            {
+                                                output[child0Center.x + (SegX * loops) + ((int)Mathf.Sign(OffsetX) * x), child0Center.y + (SegY * loops)].type = TileType.DoorFrame;
+                                                output[child0Center.x + (SegX * loops) + ((int)Mathf.Sign(OffsetX) * x), child0Center.y + (SegY * loops)].color = Color.yellow;
+                                                effected = true;
+                                            }
+                                        }
+                                        if (!effected)
+                                        {
+                                            output[child0Center.x + (SegX * loops) + ((int)Mathf.Sign(OffsetX) * x), child0Center.y + (SegY * loops)].type = TileType.Hall;
+                                            output[child0Center.x + (SegX * loops) + ((int)Mathf.Sign(OffsetX) * x), child0Center.y + (SegY * loops)].color = Color.red;
                                         }
                                     }
                                 }
@@ -480,23 +489,32 @@ public class d_MapGenerator : MonoBehaviour
                             {
                                 for (int y = 0; y < Mathf.Abs(SegY); y++)
                                 {
-                                    if (tiles[child0Center.x + (SegX * (loops + 1)), child0Center.y + (SegY * loops) + ((int)Mathf.Sign(OffsetY) * y)] != true)
+                                    if (output[child0Center.x + (SegX * (loops + 1)), child0Center.y + (SegY * loops) + ((int)Mathf.Sign(OffsetY) * y)].type != TileType.Floor)
                                     {
                                         tiles[child0Center.x + (SegX * (loops + 1)), child0Center.y + (SegY * loops) + ((int)Mathf.Sign(OffsetY) * y)] = true;
-
-                                        output[child0Center.x + (SegX * (loops + 1)), child0Center.y + (SegY * loops) + ((int)Mathf.Sign(OffsetY) * y)].type = TileType.Hall;
-                                        output[child0Center.x + (SegX * (loops + 1)), child0Center.y + (SegY * loops) + ((int)Mathf.Sign(OffsetY) * y)].color = Color.red;
-                                    }
-                                    for (int i = 1; i < HallWideness; i++)
-                                    {
-                                        if (child0Center.y + (SegY * (loops)) - i > 0 && child0Center.y + (SegY * (loops)) < MapYSize - 1 && child0Center.x + (SegX * (loops)) - i > 1 && child0Center.x + (SegX * (loops)) < MapXSize - 1)
+                                        bool effected = false;
+                                        if (output[child0Center.x + (SegX * (loops + 1)), child0Center.y + (SegY * loops) + ((int)Mathf.Sign(OffsetY) * y) + 1].type == TileType.Floor)
                                         {
-                                            if (tiles[child0Center.x + (SegX * (loops + 1)) - i, child0Center.y + (SegY * loops) + ((int)Mathf.Sign(OffsetY) * y) - i] != true)
+                                            if (output[child0Center.x + (SegX * (loops + 1)) - 1, child0Center.y + (SegY * loops) + ((int)Mathf.Sign(OffsetY) * y)].type != TileType.Hall && output[child0Center.x + (SegX * (loops + 1)) + 1, child0Center.y + (SegY * loops) + ((int)Mathf.Sign(OffsetY) * y)].type != TileType.Hall)
                                             {
-                                                tiles[child0Center.x + (SegX * (loops + 1)) - i, child0Center.y + (SegY * loops) + ((int)Mathf.Sign(OffsetY) * y) - i] = true;
-                                                output[child0Center.x + (SegX * (loops + 1)) - i, child0Center.y + (SegY * loops) + ((int)Mathf.Sign(OffsetY) * y) - i].type = TileType.Hall;
-                                                output[child0Center.x + (SegX * (loops + 1)) - i, child0Center.y + (SegY * loops) + ((int)Mathf.Sign(OffsetY) * y) - i].color = Color.red;
+                                                output[child0Center.x + (SegX * (loops + 1)), child0Center.y + (SegY * loops) + ((int)Mathf.Sign(OffsetY) * y)].type = TileType.DoorFrame;
+                                                output[child0Center.x + (SegX * (loops + 1)), child0Center.y + (SegY * loops) + ((int)Mathf.Sign(OffsetY) * y)].color = Color.yellow;
+                                                effected = true;
                                             }
+                                        }
+                                        else if (output[child0Center.x + (SegX * (loops + 1)), child0Center.y + (SegY * loops) + ((int)Mathf.Sign(OffsetY) * y) - 1].type == TileType.Floor)
+                                        {
+                                            if (output[child0Center.x + (SegX * (loops + 1)) - 1, child0Center.y + (SegY * loops) + ((int)Mathf.Sign(OffsetY) * y)].type != TileType.Hall && output[child0Center.x + (SegX * (loops + 1)) + 1, child0Center.y + (SegY * loops) + ((int)Mathf.Sign(OffsetY) * y)].type != TileType.Hall)
+                                            {
+                                                output[child0Center.x + (SegX * (loops + 1)), child0Center.y + (SegY * loops) + ((int)Mathf.Sign(OffsetY) * y)].type = TileType.DoorFrame;
+                                                output[child0Center.x + (SegX * (loops + 1)), child0Center.y + (SegY * loops) + ((int)Mathf.Sign(OffsetY) * y)].color = Color.yellow;
+                                                effected = true;
+                                            }
+                                        }
+                                        if (!effected)
+                                        {
+                                            output[child0Center.x + (SegX * (loops + 1)), child0Center.y + (SegY * loops) + ((int)Mathf.Sign(OffsetY) * y)].type = TileType.Hall;
+                                            output[child0Center.x + (SegX * (loops + 1)), child0Center.y + (SegY * loops) + ((int)Mathf.Sign(OffsetY) * y)].color = Color.red;
                                         }
                                     }
                                 }
@@ -522,22 +540,32 @@ public class d_MapGenerator : MonoBehaviour
                             {
                                 for (int y = 0; y < Mathf.Abs(SegY); y++)
                                 {
-                                    if (tiles[child0Center.x + (SegX * (loops)), child0Center.y + (SegY * loops) + ((int)Mathf.Sign(OffsetY) * y)] != true)
+                                    if (output[child0Center.x + (SegX * (loops + 1)), child0Center.y + (SegY * loops) + ((int)Mathf.Sign(OffsetY) * y)].type != TileType.Floor)
                                     {
-                                        tiles[child0Center.x + (SegX * (loops)), child0Center.y + (SegY * loops) + ((int)Mathf.Sign(OffsetY) * y)] = true;
-                                        output[child0Center.x + (SegX * (loops)), child0Center.y + (SegY * loops) + ((int)Mathf.Sign(OffsetY) * y)].type = TileType.Hall;
-                                        output[child0Center.x + (SegX * (loops)), child0Center.y + (SegY * loops) + ((int)Mathf.Sign(OffsetY) * y)].color = Color.red;
-                                    }
-                                    for (int i = 1; i < HallWideness; i++)
-                                    {
-                                        if (child0Center.y + (SegY * (loops)) - i > 0 && child0Center.y + (SegY * (loops)) < MapYSize - 1 && child0Center.x + (SegX * (loops)) - i > 1 && child0Center.x + (SegX * (loops)) < MapXSize - 1)
+                                        tiles[child0Center.x + (SegX * (loops + 1)), child0Center.y + (SegY * loops) + ((int)Mathf.Sign(OffsetY) * y)] = true;
+                                        bool effected = false;
+                                        if (output[child0Center.x + (SegX * (loops + 1)), child0Center.y + (SegY * loops) + ((int)Mathf.Sign(OffsetY) * y) + 1].type == TileType.Floor)
                                         {
-                                            if (tiles[child0Center.x + (SegX * (loops)) - i, child0Center.y + (SegY * loops) + ((int)Mathf.Sign(OffsetY) * y) - i] != true)
+                                            if (output[child0Center.x + (SegX * (loops + 1))-1, child0Center.y + (SegY * loops) + ((int)Mathf.Sign(OffsetY) * y)].type != TileType.Hall && output[child0Center.x + (SegX * (loops + 1)) + 1, child0Center.y + (SegY * loops) + ((int)Mathf.Sign(OffsetY) * y)].type != TileType.Hall)
                                             {
-                                                tiles[child0Center.x + (SegX * (loops)) - i, child0Center.y + (SegY * loops) + ((int)Mathf.Sign(OffsetY) * y) - i] = true;
-                                                output[child0Center.x + (SegX * (loops)) - i, child0Center.y + (SegY * loops) + ((int)Mathf.Sign(OffsetY) * y) - i].type = TileType.Hall;
-                                                output[child0Center.x + (SegX * (loops)) - i, child0Center.y + (SegY * loops) + ((int)Mathf.Sign(OffsetY) * y) - i].color = Color.red;
+                                                output[child0Center.x + (SegX * (loops + 1)), child0Center.y + (SegY * loops) + ((int)Mathf.Sign(OffsetY) * y)].type = TileType.DoorFrame;
+                                                output[child0Center.x + (SegX * (loops + 1)), child0Center.y + (SegY * loops) + ((int)Mathf.Sign(OffsetY) * y)].color = Color.yellow;
+                                                effected = true;
                                             }
+                                        }
+                                        else if (output[child0Center.x + (SegX * (loops + 1)), child0Center.y + (SegY * loops) + ((int)Mathf.Sign(OffsetY) * y) - 1].type == TileType.Floor)
+                                        {
+                                            if (output[child0Center.x + (SegX * (loops + 1)) - 1, child0Center.y + (SegY * loops) + ((int)Mathf.Sign(OffsetY) * y)].type != TileType.Hall && output[child0Center.x + (SegX * (loops + 1)) + 1, child0Center.y + (SegY * loops) + ((int)Mathf.Sign(OffsetY) * y)].type != TileType.Hall)
+                                            {
+                                                output[child0Center.x + (SegX * (loops + 1)), child0Center.y + (SegY * loops) + ((int)Mathf.Sign(OffsetY) * y)].type = TileType.DoorFrame;
+                                                output[child0Center.x + (SegX * (loops + 1)), child0Center.y + (SegY * loops) + ((int)Mathf.Sign(OffsetY) * y)].color = Color.yellow;
+                                                effected = true;
+                                            }
+                                        }
+                                        if (!effected)
+                                        {
+                                            output[child0Center.x + (SegX * (loops + 1)), child0Center.y + (SegY * loops) + ((int)Mathf.Sign(OffsetY) * y)].type = TileType.Hall;
+                                            output[child0Center.x + (SegX * (loops + 1)), child0Center.y + (SegY * loops) + ((int)Mathf.Sign(OffsetY) * y)].color = Color.red;
                                         }
                                     }
                                 }
@@ -547,28 +575,38 @@ public class d_MapGenerator : MonoBehaviour
                             {
                                 for (int x = 0; x < Mathf.Abs(SegX); x++)
                                 {
-                                    if (tiles[child0Center.x + (SegX * loops) + ((int)Mathf.Sign(OffsetX) * x), child0Center.y + (SegY * (loops + 1))] != true)
+                                    if (output[child0Center.x + (SegX * loops) + ((int)Mathf.Sign(OffsetX) * x), child0Center.y + (SegY * loops)].type != TileType.Floor)
                                     {
-                                        tiles[child0Center.x + (SegX * loops) + ((int)Mathf.Sign(OffsetX) * x), child0Center.y + (SegY * (loops + 1))] = true;
-                                        output[child0Center.x + (SegX * loops) + ((int)Mathf.Sign(OffsetX) * x), child0Center.y + (SegY * (loops + 1))].type = TileType.Hall;
-                                        output[child0Center.x + (SegX * loops) + ((int)Mathf.Sign(OffsetX) * x), child0Center.y + (SegY * (loops + 1))].color = Color.red;
-                                    }
-                                    for (int i = 1; i < HallWideness; i++)
-                                    {
-                                        if (child0Center.y + (SegY * (loops)) - i > 0 && child0Center.y + (SegY * (loops)) < MapYSize - 1 && child0Center.x + (SegX * (loops)) - i > 1 && child0Center.x + (SegX * (loops)) < MapXSize - 1)
+                                        tiles[child0Center.x + (SegX * loops) + ((int)Mathf.Sign(OffsetX) * x), child0Center.y + (SegY * loops)] = true;
+                                        bool effected = false;
+                                        if (output[child0Center.x + (SegX * loops) + ((int)Mathf.Sign(OffsetX) * x) + 1, child0Center.y + (SegY * loops)].type == TileType.Floor)
                                         {
-                                            if (tiles[child0Center.x + (SegX * loops) + ((int)Mathf.Sign(OffsetX) * x) - i, child0Center.y + (SegY * (loops + 1)) - i] != true)
+                                            if (output[child0Center.x + (SegX * loops) + ((int)Mathf.Sign(OffsetX) * x), child0Center.y + (SegY * loops) - 1].type != TileType.Hall && output[child0Center.x + (SegX * loops) + ((int)Mathf.Sign(OffsetX) * x), child0Center.y + (SegY * loops) + 1].type != TileType.Hall)
                                             {
-                                                tiles[child0Center.x + (SegX * loops) + ((int)Mathf.Sign(OffsetX) * x) - i, child0Center.y + (SegY * (loops + 1)) - i] = true;
-                                                output[child0Center.x + (SegX * loops) + ((int)Mathf.Sign(OffsetX) * x) - i, child0Center.y + (SegY * (loops + 1)) - i].type = TileType.Hall;
-                                                output[child0Center.x + (SegX * loops) + ((int)Mathf.Sign(OffsetX) * x) - i, child0Center.y + (SegY * (loops + 1)) - i].color = Color.red;
+                                                output[child0Center.x + (SegX * loops) + ((int)Mathf.Sign(OffsetX) * x), child0Center.y + (SegY * loops)].type = TileType.DoorFrame;
+                                                output[child0Center.x + (SegX * loops) + ((int)Mathf.Sign(OffsetX) * x), child0Center.y + (SegY * loops)].color = Color.yellow;
+                                                effected = true;
                                             }
+                                        }
+                                        else if (output[child0Center.x + (SegX * loops) + ((int)Mathf.Sign(OffsetX) * x) - 1, child0Center.y + (SegY * loops)].type == TileType.Floor)
+                                        {
+                                            if (output[child0Center.x + (SegX * loops) + ((int)Mathf.Sign(OffsetX) * x), child0Center.y + (SegY * loops) - 1].type != TileType.Hall && output[child0Center.x + (SegX * loops) + ((int)Mathf.Sign(OffsetX) * x), child0Center.y + (SegY * loops) + 1].type != TileType.Hall)
+                                            {
+                                                output[child0Center.x + (SegX * loops) + ((int)Mathf.Sign(OffsetX) * x), child0Center.y + (SegY * loops)].type = TileType.DoorFrame;
+                                                output[child0Center.x + (SegX * loops) + ((int)Mathf.Sign(OffsetX) * x), child0Center.y + (SegY * loops)].color = Color.yellow;
+                                                effected = true;
+                                            }
+                                        }
+                                        if(!effected)
+                                        {
+                                            output[child0Center.x + (SegX * loops) + ((int)Mathf.Sign(OffsetX) * x), child0Center.y + (SegY * loops)].type = TileType.Hall;
+                                            output[child0Center.x + (SegX * loops) + ((int)Mathf.Sign(OffsetX) * x), child0Center.y + (SegY * loops)].color = Color.red;
                                         }
                                     }
                                 }
                                 writing = true;
                             }
-                            
+
                             loops++;
 
                             if (!writing)
@@ -592,70 +630,122 @@ public class d_MapGenerator : MonoBehaviour
 
 
         Debug.Log("Map Generator - TODO: Start Tile Generation");
-            List<int2> coordsToFill = new List<int2>();
-            int2 start = new int2(MapXSize / 2, MapYSize / 2);
-            coordsToFill.Add(start);
-            int iterator = 0;
+        List<int2> coordsToFill = new List<int2>();
+        int2 start = new int2(MapXSize / 2, MapYSize / 2);
+        coordsToFill.Add(start);
+        int iterator = 0;
 
-            while (coordsToFill.Count > iterator)
-            {
-                int x = coordsToFill[iterator].x;
-                int y = coordsToFill[iterator].y;
-                if (output[x, y].type == TileType.Floor)
-                    output[x, y].color = Color.blue;
-                //Add top
-                if (y + 1 < output.GetLength(1))
-                {
-                    if (!coordsToFill.Contains(new int2(x, y + 1)))
-                        coordsToFill.Add(new int2(x, y + 1));
-
-                    if (output[x, y + 1].type == TileType.Hall && output[x,y].type == TileType.Floor)
-                    {
-                        output[x, y + 1].color = Color.yellow;
-                        output[x, y + 1].type = TileType.DoorFrame;
-                    }
-                }
-                //Add bottom
-                if (y - 1 > 0)
-                {
-                    if (!coordsToFill.Contains(new int2(x, y - 1)))
-                        coordsToFill.Add(new int2(x, y - 1));
-
-                    if (output[x, y - 1].type == TileType.Hall && output[x, y].type == TileType.Floor)
-                    {
-                        output[x, y - 1].color = Color.yellow;
-                        output[x, y - 1].type = TileType.DoorFrame;
-                    }
-                }
-                //Add left
-                if (x - 1 > 0)
-                {
-                    if (!coordsToFill.Contains(new int2(x - 1, y)))
-                        coordsToFill.Add(new int2(x - 1, y));
-
-                    if (output[x - 1, y].type == TileType.Hall && output[x, y].type == TileType.Floor)
-                    {
-                        output[x - 1, y].color = Color.yellow;
-                        output[x - 1, y].type = TileType.DoorFrame;
-                    }
-                }
-                //Add right
-                if (x + 1 < output.GetLength(0))
-                {
-                    if (!coordsToFill.Contains(new int2(x + 1, y)))
-                        coordsToFill.Add(new int2(x + 1, y));
-
-                    if (output[x + 1, y].type == TileType.Hall && output[x, y].type == TileType.Floor)
-                    {
-                        output[x + 1, y].color = Color.yellow;
-                        output[x + 1, y].type = TileType.DoorFrame;
-                    }
-                }
-                //increment past this
-                iterator++;
-                yield return null;
-
-            }
+        //while (coordsToFill.Count > iterator)
+        //{
+        //    int x = coordsToFill[iterator].x;
+        //    int y = coordsToFill[iterator].y;
+        //    if (output[x, y].type == TileType.Floor)
+        //        output[x, y].color = Color.blue;
+        //    //Add top
+        //    if (y + 1 < output.GetLength(1))
+        //    {
+        //        if (!coordsToFill.Contains(new int2(x, y + 1)))
+        //            coordsToFill.Add(new int2(x, y + 1));
+        //        bool changed = false;
+        //        if (output[x, y].type == TileType.Hall && output[x, y + 1].type == TileType.Floor)
+        //        {
+        //            if (output[x, y - 1].type == TileType.Hall || output[x, y - 1].type == TileType.Floor)
+        //            {
+        //                if (output[x, y - 1].type == TileType.WallSolid || output[x, y - 1].type == TileType.DoorFrame || output[x, y + 1].type == TileType.WallSolid || output[x, y + 1].type == TileType.DoorFrame || output[x - 1, y].type == TileType.WallSolid || output[x - 1, y].type == TileType.DoorFrame || output[x + 1, y].type == TileType.WallSolid || output[x + 1, y].type == TileType.DoorFrame)
+        //                {
+        //                    output[x, y].color = Color.yellow;
+        //                    output[x, y].type = TileType.DoorFrame;
+        //                    changed = true;
+        //                }
+        //            }
+        //            if (!changed)
+        //            {
+        //                output[x, y].color = Color.blue;
+        //                output[x, y].type = TileType.Floor;
+        //            }
+        //        }
+        //    }
+        //    //Add bottom
+        //    if (y - 1 > 0)
+        //    {
+        //        if (!coordsToFill.Contains(new int2(x, y - 1)))
+        //            coordsToFill.Add(new int2(x, y - 1));
+        //        bool changed = false;
+        //        if (output[x, y].type == TileType.Hall && output[x, y - 1].type == TileType.Floor)
+        //        {
+        //            if (output[x, y + 1].type == TileType.Hall || output[x, y + 1].type == TileType.Floor)
+        //            {
+        //                if (output[x, y - 1].type == TileType.WallSolid || output[x, y - 1].type == TileType.DoorFrame || output[x, y + 1].type == TileType.WallSolid || output[x, y + 1].type == TileType.DoorFrame || output[x - 1, y].type == TileType.WallSolid || output[x - 1, y].type == TileType.DoorFrame || output[x + 1, y].type == TileType.WallSolid || output[x + 1, y].type == TileType.DoorFrame)
+        //                {
+        //                    output[x, y].color = Color.yellow;
+        //                    output[x, y].type = TileType.DoorFrame;
+        //                    changed = true;
+        //                }
+        //            }
+        //
+        //            if (!changed)
+        //            {
+        //                output[x, y].color = Color.blue;
+        //                output[x, y].type = TileType.Floor;
+        //            }
+        //        }
+        //    }
+        //    //Add left
+        //    if (x - 1 > 0)
+        //    {
+        //        if (!coordsToFill.Contains(new int2(x - 1, y)))
+        //            coordsToFill.Add(new int2(x - 1, y));
+        //        bool changed = false;
+        //        if (output[x, y].type == TileType.Hall && output[x - 1, y].type == TileType.Floor)
+        //        {
+        //            if (output[x + 1, y].type == TileType.Hall || output[x + 1, y].type == TileType.Floor)
+        //            {
+        //                if (output[x, y - 1].type == TileType.WallSolid || output[x, y - 1].type == TileType.DoorFrame || output[x, y + 1].type == TileType.WallSolid || output[x, y + 1].type == TileType.DoorFrame || output[x - 1, y].type == TileType.WallSolid || output[x - 1, y].type == TileType.DoorFrame || output[x + 1, y].type == TileType.WallSolid || output[x + 1, y].type == TileType.DoorFrame)
+        //                {
+        //                    output[x, y].color = Color.yellow;
+        //                    output[x, y].type = TileType.DoorFrame;
+        //                    changed = true;
+        //                }
+        //            }
+        //
+        //            if (!changed)
+        //            {
+        //                output[x, y].color = Color.blue;
+        //                output[x, y].type = TileType.Floor;
+        //            }
+        //        }
+        //    }
+        //    //Add right
+        //    if (x + 1 < output.GetLength(0))
+        //    {
+        //        if (!coordsToFill.Contains(new int2(x + 1, y)))
+        //            coordsToFill.Add(new int2(x + 1, y));
+        //
+        //        bool changed = false;
+        //        if (output[x, y].type == TileType.Hall && output[x + 1, y].type == TileType.Floor)
+        //        {
+        //            if (output[x - 1, y].type == TileType.Hall || output[x - 1, y].type == TileType.Floor)
+        //            {
+        //                if (output[x, y - 1].type == TileType.WallSolid || output[x, y - 1].type == TileType.DoorFrame || output[x, y + 1].type == TileType.WallSolid || output[x, y + 1].type == TileType.DoorFrame || output[x - 1, y].type == TileType.WallSolid || output[x - 1, y].type == TileType.DoorFrame || output[x + 1, y].type == TileType.WallSolid || output[x + 1, y].type == TileType.DoorFrame)
+        //                {
+        //                    output[x, y].color = Color.yellow;
+        //                    output[x, y].type = TileType.DoorFrame;
+        //                    changed = true;
+        //                }
+        //            }
+        //
+        //            if (!changed)
+        //            {
+        //                output[x, y].color = Color.blue;
+        //                output[x, y].type = TileType.Floor;
+        //            }
+        //        }
+        //    }
+        //    //increment past this
+        //    iterator++;
+        //    yield return null;
+        //
+        //}
 
 
 
